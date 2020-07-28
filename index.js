@@ -62,44 +62,46 @@ async function run(db, geocoder) {
   try {
     const venues = await db.collection('venue').find({}).toArray((err, docs) => {
       if(docs.length > 0) {
-        
+
         console.log('found ' + docs.length + ' venues.'); 
         for(let venue of docs) {
-          
-          // check if the venue already has already been migrated.
-          if(venue.latLng) {
-            console.log('Venue ' + venue.name + ' has already been migrated.');
-          }
-          else {
-            console.log('GeoCoding ' + venue.name);
-  
-            // Allow the address line 2 field to be empty.
-            if(!venue.address.line2) {
-              venue.address.line2 = ' ';
+          window.setTimeout(async () => {
+
+            // check if the venue already has already been migrated.
+            if(venue.latLng) {
+                console.log('Venue ' + venue.name + ' has already been migrated.');
             }
-  
-            // Generate the long address string for the venue.
-            const venueAddressString = venue.address.line1 + ', ' + venue.address.line2 + ', ' + venue.address.city + ', ' +  venue.address.country + ', ' + venue.address.postCode;
-            geocoder({
-              address: venueAddressString
-  
-            }, async function(err, response) {
-              console.error.log(response.json.results);
-  
-              // Save the response to the database.
-              await db.collection('venue').update({
-                _id: objectId(venue._id)
-              }, {
-                $set: {
-                  latLng: response.json.results
-                }
+            else {
+              console.log('GeoCoding ' + venue.name);
+    
+              // Allow the address line 2 field to be empty.
+              if(!venue.address.line2) {
+                venue.address.line2 = ' ';
+              }
+    
+              // Generate the long address string for the venue.
+              const venueAddressString = venue.address.line1 + ', ' + venue.address.line2 + ', ' + venue.address.city + ', ' +  venue.address.country + ', ' + venue.address.postCode;
+              geocoder({
+                address: venueAddressString
+    
+              }, async function(err, response) {
+                console.error.log(response.json.results);
+    
+                // Save the response to the database.
+                await db.collection('venue').update({
+                  _id: objectId(venue._id)
+                }, {
+                  $set: {
+                    latLng: response.json.results
+                  }
+                });
+    
+                console.log(venue.name + ' Completed. ')
+    
               });
-  
-              console.log(venue.name + ' Completed. ')
-  
-            });
-          }
-  
+            }
+
+          }, 2500);
         }
   
       }
