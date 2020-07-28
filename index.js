@@ -2,7 +2,7 @@ const mongodb = require('mongodb');
 const ObjectId = mongodb.ObjectID;
 const googleMaps = require('@google/maps');
 
-const config = require('config.json');
+const config = require('./config.json');
 
 
 
@@ -55,12 +55,12 @@ async function init() {
  * Function used to run the migration.
  * 
  */
-async function run(gocoder, db) {
+async function run(db, geocoder) {
 
   // Load the venues from the database.
   console.log('Loading venues from database.');
   try {
-    const venues = await db.collection('venue').findAll();
+    const venues = await db.collection('venue').find({});
     if(venues.length > 0) {
       console.log('found ' + venues.length + ' venues.'); 
       for(let venue of venues) {
